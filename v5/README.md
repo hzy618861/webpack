@@ -335,6 +335,62 @@ url-loader内部也可以调用file-loader，通过limit属性控制，比limit�
 ```
 
 ## 插件
+ loader 对特定文件类型进行转换 ，一个loader是一个函数
+ plugin 可以在webpack工作任意实际做一些事情，贯穿webpack整个生命周期,一个插件就是一个类
+  
+1. clean-webpack-plugin  清除打包后的目录
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+plugins:[
+         new CleanWebpackPlugin()
+]
+2. html-webpack-plugin 自动生成html，引入打包后的资源
+ const {DefinePlugin} = require('webpack')  //定义全局常量
+ const htmlWebackPlugin = require('html-webpack-plugin')
+ plugins:[
+         new htmlWebackPlugin({
+              title:"首页",
+              template:'./public/index.html'
+         }),
+         new DefinePlugin({
+              BASE_URL:'"./"'
+         })
+ ]
 
+template自定义html模板
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="<%= BASE_URL %>favicon.ico">
+    <title>
+        <%= htmlWebpackPlugin.options.title %>
+    </title>
+</head>
+<body>
+    <div id="app">测试</div>
+</body>
+</html>
+```
+3. copy-webpack-plugin  
+- 实现资源拷贝，如public文件夹内容,globOptions用来忽略文件
+```
+const copyWebpackPlugin = require('copy-webpack-plugin')
+ plugins:[
+         new  copyWebpackPlugin({
+              patterns:[
+                   {
+                        from:"public",
+                        globOptions:{
+                             ignore:['**/index.html']
+                        }
+                   }
+              ]
+         })
+ ]
+```
+## babel
 
 

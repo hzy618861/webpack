@@ -1,8 +1,13 @@
 const path = require('path')
+const {DefinePlugin} = require('webpack')
+const {CleanWebpackPlugin} = require('clean-webpack-plugin')
+const htmlWebackPlugin = require('html-webpack-plugin')
+const copyWebpackPlugin = require('copy-webpack-plugin')
 module.exports = {
+     mode:"development",
      entry:"./src/index.js",
      output:{
-          filename:"build.js",
+          filename:"js/build.js",
           path:path.resolve(__dirname,'./dist'),
           assetModuleFilename:"img/[name].[hash:6][ext]"
      },
@@ -95,5 +100,26 @@ module.exports = {
                  
           ]
      },
+     plugins:[
+         new CleanWebpackPlugin(),
+         new htmlWebackPlugin({
+              title:"首页",
+              template:'./public/index.html'
+         }),
+         new DefinePlugin({
+              BASE_URL:'"./"'
+         }),
+         new  copyWebpackPlugin({
+              patterns:[
+                   {
+                        from:"public",
+                        globOptions:{
+                             ignore:['**/index.html']
+                        }
+                   }
+              ]
+         })
+  
+     ]
  
 }
