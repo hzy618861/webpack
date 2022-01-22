@@ -1,0 +1,6 @@
+.hzy{
+     display: grid;
+     user-select: none;
+     transition:  all .5s;
+     color:#12345678;
+}

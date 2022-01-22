@@ -1,0 +1,12 @@
+.hzy{
+     display: grid;
+     -webkit-user-select: none;
+        -moz-user-select: none;
+         -ms-user-select: none;
+             user-select: none;
+     -webkit-transition:  all .5s;
+     -o-transition:  all .5s;
+     -moz-transition:  all .5s;
+     transition:  all .5s;
+}
+/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInNyYy9jc3MvdGVzdC5jc3MiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7S0FDSyxhQUFhO0tBQ2IseUJBQWlCO1FBQWpCLHNCQUFpQjtTQUFqQixxQkFBaUI7YUFBakIsaUJBQWlCO0tBQ2pCLDRCQUFvQjtLQUFwQix1QkFBb0I7S0FBcEIseUJBQW9CO0tBQXBCLG9CQUFvQjtBQUN6QiIsImZpbGUiOiJyZXQuY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLmh6eXtcclxuICAgICBkaXNwbGF5OiBncmlkO1xyXG4gICAgIHVzZXItc2VsZWN0OiBub25lO1xyXG4gICAgIHRyYW5zaXRpb246ICBhbGwgLjVzO1xyXG59Il19 */
