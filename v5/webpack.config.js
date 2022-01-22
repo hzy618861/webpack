@@ -62,13 +62,37 @@ module.exports = {
                //      ]
                // }
                
-               {
+               // {
+               //      test: /\.(png|jpe?g|gif|svg)$/,   
+               //      type:"asset/resource",
+               //      generator:{
+               //           filename:"img/[name].[hash:6][ext]"
+               //      }
+               // }
+               // {
+               //      test: /\.(png|jpe?g|gif|svg)$/,   
+               //      type:"asset/inline",
+               // }
+                {
                     test: /\.(png|jpe?g|gif|svg)$/,   
-                    type:"asset/resource",
+                    type:"asset",
                     generator:{
                          filename:"img/[name].[hash:6][ext]"
+                    },
+                    parser:{
+                         dataUrlCondition:{
+                               maxSize:10*1024
+                         }
                     }
-               }
+                },
+                {
+                    test: /\.(ttf|woff2?)$/,   
+                    type:"asset/resource",
+                    generator:{
+                         filename:"font/[name].[hash:6][ext]"
+                    },
+                }
+                 
           ]
      },
  

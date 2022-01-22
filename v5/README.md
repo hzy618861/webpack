@@ -294,7 +294,7 @@ url-loader内部也可以调用file-loader，通过limit属性控制，比limit�
      output:{
           assetModuleFilename:"img/[name].[hash:6][ext]"  //设置asset的输出路径和文件名格式,全局方式
      },
-     modlue中配置
+     modlue中配置 作用类型file-loader
       {
                     test: /\.(png|jpe?g|gif|svg)$/,   
                     type:"asset/resource",
@@ -302,8 +302,39 @@ url-loader内部也可以调用file-loader，通过limit属性控制，比limit�
                          filename:"img/[name].[hash:6][ext]"
                     }
       }
+      //作用类似url-loader
+      {
+                    test: /\.(png|jpe?g|gif|svg)$/,   
+                    type:"asset/inline",
+                   
+        }
+        //类似url-loader 配置limit
+       {
+                    test: /\.(png|jpe?g|gif|svg)$/,   
+                    type:"asset",
+                    generator:{
+                         filename:"img/[name].[hash:6][ext]"
+                    },
+                    parser:{
+                         dataUrlCondition:{
+                               maxSize:10*1024
+                         }
+                    }
+        }
+```
+### asset处理字体
+
+```
+               {
+                    test: /\.(ttf|woff2?)$/,   
+                    type:"asset/resource",  //实现静态文件拷贝输出
+                    generator:{
+                         filename:"font/[name].[hash:6][ext]"
+                    },
+                }
 ```
 
+## 插件
 
 
 
