@@ -3,7 +3,9 @@ const {DefinePlugin} = require('webpack')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const htmlWebackPlugin = require('html-webpack-plugin')
 const copyWebpackPlugin = require('copy-webpack-plugin')
+const babelLoader = require('babel-loader')
 module.exports = {
+     devtool:false,
      mode:"development",
      entry:"./src/index.js",
      output:{
@@ -96,6 +98,11 @@ module.exports = {
                     generator:{
                          filename:"font/[name].[hash:6][ext]"
                     },
+                },
+                {
+                    test: /\.js$/,   
+                    exclude:/node_modules/,
+                    use:["babel-loader"]
                 }
                  
           ]

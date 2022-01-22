@@ -6,6 +6,7 @@
   "scripts": {
     "build": "webpack  --entry  ./src/main.js  --output-path ./build",
     "build2": "webpack",
+    "serve": "webpack serve",
     "build3": "webpack --config webpack.custom.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,7 +18,12 @@
     "not dead"
   ],
   "devDependencies": {
+    "@babel/cli": "^7.16.8",
+    "@babel/core": "^7.16.10",
+    "@babel/plugin-transform-arrow-functions": "^7.16.7",
+    "@babel/preset-env": "^7.16.11",
     "autoprefixer": "^10.4.2",
+    "babel-loader": "^8.2.3",
     "clean-webpack-plugin": "^4.0.0",
     "copy-webpack-plugin": "^10.2.1",
     "css-loader": "^6.5.1",
@@ -32,6 +38,13 @@
     "style-loader": "^3.3.1",
     "url-loader": "^4.1.1",
     "webpack": "^5.66.0",
-    "webpack-cli": "^4.9.1"
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-middleware": "^5.3.0",
+    "webpack-dev-server": "^4.7.3"
+  },
+  "dependencies": {
+    "core-js": "^3.20.3",
+    "express": "^4.17.2",
+    "regenerator-runtime": "^0.13.9"
   }
 }

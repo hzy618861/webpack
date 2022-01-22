@@ -6,3 +6,6 @@ const ajax = require('./js/api')
 console.log(sum(3,2))
 console.log(square(3))
 console.log(ajax())
+const a = () => {}
+const promise = new Promise()
+console.log('22222ssssss21')

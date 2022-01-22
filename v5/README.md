@@ -392,5 +392,118 @@ const copyWebpackPlugin = require('copy-webpack-plugin')
  ]
 ```
 ## babel
+- jsx ts es6+ -> 产出浏览器能使用的模块，处理js兼容
+- 本身不具备功能转换 需要安装对于的babel插件进行转换，ex:@babel/plugin-transform-arrow-functions 箭头函数转换
+npm i @babel/core @babel/cli @babel/plugin-transform-arrow-functions  -D
+- 命令行使用 
+npx babel src/index.js  --out-dir  build  --plugins=@babel/plugin-transform-arrow-functions
+
+- 预设(集合，涵盖es6+语法)
+@babel/preset-env
+
+npx babel src/index.js  --out-dir  build  --presets=@babel/preset-env 
+
+## babel-loader
+- npm i babel-loader  @babel/preset-env
+- 默认基于browserslist配置规则进行平台的兼容处理
+- 也可以通过presets配置进行配置兼容的平台
+- 还可以基于配置文件中，有两种1.babel.config.js(json cjs mjs)(babel 7之后)  2.babelrc.json(babel 7之前)
+babel.config.js
+```
+module.exports = {
+    presets:['@babel/preset-env']
+}
+```
+```
+  {
+                    test: /\.js$/,   
+                    use:[
+                         {
+                              loader:"babel-loader",
+                              options:{
+                                  presets:[
+                                       ['@babel/preset-env',{
+                                             targets:"chrome 91"
+                                        }
+                                      ]
+                               ]
+                              }
+                         }
+                    ]
+}
+```
+
+```
+
+```
+
+## polyfill配置
+- promise symbol等语法@babel/preset-env无法转换 
+  
+npm i core-js(语法功能) regenerator-runtime(转换async await gengerate...)
+
+module.exports = {
+    presets:[
+        ['@babel/preset-env',{
+            //默认 false 不对当前js做polyfill填充  
+            //usage 依据当前用户源代码中所使用的新语法进行填充
+            //entry 依据所要兼容的浏览器（browserslist规则）来进行填充  entry需要导入核心包  import "core-js/stable"  import "regenerator-runtime/runtime"
+            useBuiltIns: "usage",
+            corejs:3
+        }]
+    ]
+}
+
+## webpack-dev-server
+- 开发服务器
+修改代码开发环境实时更新
+1. package.json配置scripts开启监控
+```
+    "build": "webpack --watch",
+```
+2. webpack配置文件 添加watch
+```
+    watch:true,
+```
+但这两种方式也有不足
+1. 修改某个文件，会重新打包所有的文件
+2. 编译成功后都需要进行文件读写
+3. live server
+4. 无法实现热更新
+
+上述可以通过webpack-dev-server解决
+1. 安装 npm i webpack-dev-server
+2. package.json配置打包命令 
+- 默认去找webpack.conifg.js
+如果配置文件不叫这个名字，需要指定配置
+结果写入在内存中，不会生成dist文件
+   "serve":"webpack serve --config xxx.webpack.js",
+```
+    "serve":"webpack serve",
+```
+## webpack-dev-middleware
+- 可以把webpack处理完的内容返回给服务器
+- 可以对打包结果做自由度的控制
+- npm i webpack-dev-middleware -D
+
+```
+const express = require('express')
+const middleware = require('webpack-dev-middleware')
+const webpack = require('webpack')
+const app = express()
+
+//获取配置文件
+const config = require('./webpack.config.js')
+const compiler = webpack(config)
+//可以把webpack处理完的内容返回给server
+app.use(middleware(compiler))
+//开启服务
+app.listen(3000,()=>{
+    console.log('serve at 3000...')
+})
+```
+
+
+## HMR
 
 
