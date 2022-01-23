@@ -8,19 +8,19 @@ import login from './js/login'
 // console.log(ajax())
 import React from 'react'
 import ReactDom from 'react-dom'
-// import App from './react/index.jsx'
-import App from '@/vue/index'
-import Vue from 'vue'
+import App from './react/index.jsx'
+// import App from '@/vue/index'
+// import Vue from 'vue'
 
-const a = '1'
-if(module.hot){
-    module.hot.accept(['./js/login.js'],()=>{
-         console.log('login 更新了')
-    })
-}
-new Vue({
-    render(h){
-         return h(App)
-    }
-}).$mount('#app')
-// ReactDom.render(<App/>,document.getElementById('app'))
+// const a = '1'
+// if(module.hot){
+//     module.hot.accept(['./js/login.js'],()=>{
+//          console.log('login 更新了')
+//     })
+// }
+// new Vue({
+//     render(h){
+//          return h(App)
+//     }
+// }).$mount('#app')
+ReactDom.render(<App/>,document.getElementById('app'))

@@ -879,9 +879,176 @@ html页面中通过script引入cdn链接
 ```
 
 9. Dll库
+- DllPlugin 把共同的模块不经常变动的模块做成一个动态链接库文件
+- ex  vue react不用每个项目都打包，将它们做成一个dll库，每次像cdn一样去映入
 
+01. 制作dll库
+const path = require('path')
+const webpack = require('webpack')
+const terser = require('terser-webpack-plugin')
+module.exports = {
+    mode:"production",
+    entry:{
+        react:['react','react-dom']
+    },
+    output:{
+        path:path.resolve(__dirname,'../dll'),
+        filename:"dll_[name].js",
+        library:"dll_[name]"
+    },
+    optimization: {
+        minimizer: [new terser({
+             extractComments: false
+        })],
+    },
+    plugins:[
+          new webpack.DllPlugin({
+              name:"dll_[name]",
+              path:path.resolve(__dirname,'../dll/[name].manifest.json')
+          })
+    ]
+}
+
+02. 引入dll库 
+npm i add-asset-html-webpack-plugin -D
+ plugins:[
+         new webpack.DllReferencePlugin({
+              manifest: resolveApp('./dll/react.manifest.json'),
+              context:resolveApp('./')  //相对manifest如何找目标js
+         }),
+         new AddAssetHtmlPlugin({ 
+              outputPath:"js",
+              filepath:resolveApp('./dll/dll_react.js')
+         }),
+]
+
+## css文件抽离压缩
+npm i mini-css-extract-plugin -D
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+ new MiniCssExtractPlugin({
+              filename:"[name].[ hash:8].css"
+})
+替换style-loader
+  use: [
+                              // "style-loader",
+                              isPro?MiniCssExtractPlugin.loader:"style-loader",
+     {
+                                   loader:"css-loader",
+                                   options:{
+                                         esModule:false,
+                                         importLoaders:1 //css loader工作中又找到了css,往前找一个loader进行处理
+                                   }
+                              },
+                              "postcss-loader"
+        ]
  
 
+## css压缩
+- npm i css-minimizer-webpack-plugin -D
+- const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 
+ optimization: {
+     minimizer: [
+       new CssMinimizerPlugin(),
+     ],
+}
 
+## js压缩
+- npm install terser-webpack-plugin -D
+- 依赖于terser库
+const TerserPlugin = require("terser-webpack-plugin");
+
+module.exports = {
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin()],
+  },
+};
+
+## scope hoisting
+原理：将所有模块的代码按照引用顺序放在一个函数作用域里，然后适当的重命名一些变量以防止变量名冲突
+对比：通过scope hoisting可以减少函数声明代码和内存开销
+- production默认开启
+ plugins: [
+      // 开启 Scope Hoisting 功能
+      new webpack.optimize.ModuleConcatenationPlugin()
+  ]
        
+## usedExports
+    
+   optimization: {
+      usedExports:true,
+      minimizer: [new TerserPlugin({
+                    extractComments: false
+     })],
+     minimize:true
+   }
+   对于没有用到的代码会通过注释做标记 /*unused harmony ....*/
+   通过TerserPlugin进行无用代码剔除
+
+## sideEffects
+webpack 去除 tree shaking 带来副作用的代码
+package.json 设置sideEffects:false
+- 指定模块副作用 指定模块不会参与tree shaking 
+sideEffects:[
+     './src/title.js'
+]
+- 对于css如果想使用副作用，可以在rules中配置sideEffects：true
+
+
+## css tree shaking
+- npm i purgecss-webpack-plugin glob -D
+
+ new purgecssWebpackPlugin({
+            paths:glob.sync(`${resolveApp("./src")}/**/*`,{nodir:true}),
+            safelist:function(){
+                 return {
+                      standard:['body','html'] //保存html body
+                 }
+            }
+
+ })
+
+## 资源压缩
+- devServer 配置 compress:true 开启gzip压缩，针对开发环境
+- 生产环境 compression-webpack-plugin
+
+ npm install compression-webpack-plugin --save-dev
+
+ const CompressionPlugin = require("compression-webpack-plugin");
+
+module.exports = {
+  plugins: [new CompressionPlugin({
+       test:/\.(css|js)$/, //指定文件类型进行压缩
+       minRatio:0.8 //压缩比例
+  })],
+};
+
+
+## inlineChunkHtmlPlugin
+- runtime js内联嵌入html中
+npm i  inline-chunk-html-plugin  -D
+var InlineChunkHtmlPlugin = require('inline-chunk-html-plugin');
+ new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime.*\.js/]),
+
+ ## 打包库
+ - output选项
+ libraryTarget:"umd"
+ library:"$" //全局访问变量
+ globalObject:this
+
+ ## 打包时间内容分析
+ 1. pm install --save-dev speed-measure-webpack-plugin  分析webpack各种配置打包时间
+ 
+
+ const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
+
+const smp = new SpeedMeasurePlugin();
+
+const webpackConfig = smp.wrap(webpack配置文件);
+
+ 2. npm install --save-dev webpack-bundle-analyzer
+ webpack-bundle-analyzer 可视化分析打包后的资源
+
+ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+ new BundleAnalyzerPlugin()
