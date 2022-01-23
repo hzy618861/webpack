@@ -3,15 +3,28 @@ const {DefinePlugin} = require('webpack')
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const htmlWebackPlugin = require('html-webpack-plugin')
 const copyWebpackPlugin = require('copy-webpack-plugin')
+const reactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const babelLoader = require('babel-loader')
 module.exports = {
-     devtool:false,
      mode:"development",
+     devtool:"source-map",
      entry:"./src/index.js",
+     resolve:{
+          extensions:['.js','.json','.vue','.jsx'],
+          alias:{
+               "@":path.resolve(__dirname,'src')
+          }
+     },
      output:{
           filename:"js/build.js",
           path:path.resolve(__dirname,'./dist'),
+          //publicPath:'/',  // 域名 + publicPath + filename 进行资源查找
           assetModuleFilename:"img/[name].[hash:6][ext]"
+     },
+     target:"web", //屏蔽browserslist,防止冲突
+     devServer:{
+          hot:true,
+         
      },
      module: {
           rules:[
@@ -100,13 +113,22 @@ module.exports = {
                     },
                 },
                 {
-                    test: /\.js$/,   
+                    test: /\.jsx?$/,   
                     exclude:/node_modules/,
                     use:["babel-loader"]
+                },
+                {
+                    test: /\.ts$/,   
+                    use:["babel-loader"]
+                },
+                {
+                    test: /\.vue?$/,   
+                    use:["vue-loader"]
                 }
                  
           ]
      },
+
      plugins:[
          new CleanWebpackPlugin(),
          new htmlWebackPlugin({
@@ -125,7 +147,8 @@ module.exports = {
                         }
                    }
               ]
-         })
+         }),
+         new reactRefreshWebpackPlugin()
   
      ]
  

@@ -506,4 +506,382 @@ app.listen(3000,()=>{
 
 ## HMR
 
+1. webpack.config.js配置
+```
+     target:"web", //屏蔽browserslist,防止冲突hot失效
+     devServer:{
+          hot:true
+     }
+```
+2. 在入口文件对需要开启hmr的文件判断
+```
 
+if(module.hot){
+    module.hot.accept(['./js/login.js'],()=>{
+         console.log('login 更新了')
+    })
+}
+
+```
+
+## React组件HMR
+1. npm i  @babel/preset-react react-refresh  @pmmmwh/react-refresh-webpack-plugin -D
+npm i react react-dom -S
+2. babel.config.js 
+```
+presets:[
+    ['@babel/preset-env'],
+    ['@babel/preset-react']  //处理jsx语法
+],
+plugins:[
+    ['react-refresh/babel']
+]
+```
+3. webpack.config.js配置jsx解析规则
+加载 @pmmmwh/react-refresh-webpack-plugin插件
+```
+{
+     test:/\.jsx?$/,
+     use:['babel-loader']
+}
+```
+```
+plugins:[new reactRefreshWebpackPlugin()]
+```
+
+## vue组件HMR
+npm i vue@2.6.14 -S
+npm i vue-template-compiler@2.6.14  vue-loader@14 -D
+1. 配置vue文件规则
+```
+  {
+                    test: /\.vue?$/,   
+                    use:["vue-loader"]
+}
+```
+
+vue-loader 15版本需要手动导入 const loader = require('vue-loader/lib/plugin')
+plugins中进行实例化
+
+
+## output
+publicPath:'',  // 域名 + publicPath + filename 进行资源查找
+output:{
+          filename:"js/build.js",
+          path:path.resolve(__dirname,'./dist'),
+          publicPath:'',  // 域名 + publicPath + filename 进行资源查找
+          assetModuleFilename:"img/[name].[hash:6][ext]"
+ },
+
+## devServer 
+ 告诉本地服务所在目录
+  devServer:{
+          hot:true,
+          publicPath:'/'   默认值为/ 代表当前项目所在的目录 需要和output中的publicPath保持一致
+          contentBase:"",//打包后的资源依赖其他资源（没有被webpack打包），告诉它去哪找，绝对路径
+          watchContentBase:true //contentBase资源变化重新打包资源
+ },
+- 其他常用属性配置
+1. hotOnly:true 启用热模块替换功能，在构建失败时不刷新页面作为回退
+2. port:8080
+3. open:true 
+4. compress:true //开启gzip压缩
+5. historyApiFallback: true //解决单页路由history刷新404问题
+
+
+## proxy代理
+```
+ devServer:{
+       proxy:{
+            "/api":{
+                 target:"http://bb.xx.com",  // /api开头的服务被转发的地址
+                 pathRewrite:{"^/api":""}, //路径重写
+                 changeOrigin:true //修改请求host地址  网页host看不到，发出去的host依据修改
+            } 
+       }
+ }
+```
+
+## resolve
+- 配置模块解析
+- 对于直接引入的模块，默认去resolve的modules中去查找，默认是node_modules
+- 对于文件没有确定后缀名，webpack会根据 resolve的extensions的扩展名依次查找
+ resolve:{
+          extensions:['.js','.json','.vue','.jsx'],
+          alias:{
+               "@":path.resolve(__dirname,'src')
+          }
+}
+- 对于文件夹，没有后续文件路径，会去resolve的mainFiles中去找，默认是index
+- alias配置路径别名，简化路径书写
+
+## source-map
+- 真实编译代码和源代码有差异，为了方法调试代码，可以开启source-map，依据转换后的代码与源码的映射
+devtool: 'source-map'
+1. eval 会将souce-map信息保存在源码中
+2. source-map
+3. eval-souce-map  base64形式把map信息放入到代码中
+4. inline-source-map  
+5. cheap-source-map 报错只提供行信息
+6. cheap-module-source-map 报错只提供行信息
+7. hidden-source-map 
+8. nosources-source-map 生成map文件，错误提示找不到源文件
+
+## ts-loader
+1. npm i typescript -g 
+2. tsc --init 初始化ts配置
+tsc ./src/index.ts 编译ts
+3. 利用loader打包 安装ts-loader  npm i ts-loader
+
+ {
+                    test: /\.ts$/,   
+                    use:["ts-loader"]
+},
+
+
+## babel-loader处理ts文件
+- ts-loader只能进行ts语法转换
+- 需要对ts文件的兼容(es6+)处理
+- @babel/preset-typescript预设，处理ts中的语法
+
+babael.config.js设置
+```
+ module.exports = {
+    presets:[
+        ['@babel/preset-env',{
+            //默认 false 不对当前js做polyfill填充
+            useBuiltIns: "usage",
+            corejs:3
+        }],
+        ['@babel/preset-react'], //处理jsx
+        ['@babel/preset-typescript']
+    ],
+    plugins:[
+        ['react-refresh/babel']
+    ]
+} 
+```
+
+package.json配置ts编译命令  tsc --noEmit,为了解决babel-loader无法识别ts语法错误
+本地编译可以先运行ts编译在运行打包命令，完成先校验语法后打包的过程
+build:"npm run jy&&webpack"
+"jy":"tsc --noEmit"
+
+
+## 区分打包环境
+webpack配置文件导出一个函数,参数中可以获取打包命令传递的参数
+"build": "webpack --config ./config/webpack.common.js --env production",
+```
+module.exports = (env) => {
+     const isProduction = env.prodcution
+     return {
+          
+     }
+}
+```
+
+## 合并不同环境配置文件
+- webpack-merge
+
+const devConfig = require('./webpack-dev.js')
+const prodConfig = require('./webpack-prod.js')
+module.exports = (env) => {
+     const isProduction = env.production
+     //依据打包模式合并配置
+     const config = isProduction? prodConfig:devConfig
+     const mergeConfig = merge(commonConfig,config)
+     return mergeConfig
+}
+
+babel.config.js配置
+需要在webpack.common.js中设置环境变量
+ process.env.NODE_ENV = isProduction ?'production':"development" 
+```
+const presets = [
+    ['@babel/preset-env',{
+        //默认 false 不对当前js做polyfill填充
+        useBuiltIns: "usage",
+        corejs:3
+    }],
+    ['@babel/preset-react'], //处理jsx
+    ['@babel/preset-typescript']
+]
+const plugins = []
+if(process.env.NODE_ENV==='development'){
+    plugins.push(['react-refresh/babel'])
+}
+module.exports = {
+    presets,
+    plugins
+}
+
+
+```
+
+
+## 代码拆分性能优化
+1. 配置多入口打包
+ entry:{
+          main1:"./src/main1.js",
+          main2:"./src/main2.js",
+ },
+ output:{
+          filename:"js/[name].build.js", //多入口打包
+          path:resolveApp('./dist'),
+          //publicPath:'/',  // 域名 + publicPath + filename 进行资源查找
+          assetModuleFilename:"img/[name].[hash:6][ext]"
+ }
+ //出去引入第三方的产生的license文件
+const TerserPlugin = require('terser-webpack-plugin');
+optimization: {
+          minimizer: [new TerserPlugin({
+               extractComments: false
+          })],
+},
+2. 可以通过entry的dependOn属性进行第三方资源的分包加载，第三方资源单独打成一个包
+main1:{
+               import:"./src/main1.js",
+               dependOn:"lodash"
+},
+ain1:{
+               import:"./src/main2.js",
+               dependOn:"lodash"
+},
+ lodash:"lodash"
+ 
+ 
+ main1和main2共同依赖多个资源，可以有如下写法'lodash','jquery'单独打成一个包
+ main1:{
+               import:"./src/main1.js",
+               dependOn:"shared"
+ },
+ main2:{
+               import:"./src/main2.js",
+               dependOn:"shared"
+ },
+ shared:['lodash','jquery']
+
+ 3. splitChunks拆包
+ - chunks 默认值为async(异步)  initial(同步) all(都处理)
+ - minSize: 一个包拆出来大小小于这个值，就不会被拆出来 默认200000 (20kb左右)
+ - maxSize: 包的体积大于maxSize进行拆分
+ - minChunks: 包被拆分要至少被引用一次 和minSize maxSize会相互影响，minSize maxSize优先级高
+ - cacheGroups: 对拆分的包进行分组，分组后按照规则进行合并 
+optimization: {
+          splitChunks:{
+               chunks: 'all',
+               minSize:20000,
+               minChunks:1,
+               cacheGroups:{
+                   syVendors:{
+                         test:/[\\/]node_modules[\\/]/,
+                         filename:"js/[id]_vendor.js",
+                         priority:-10,//设置优先级，值越大优先级越高
+                   }，
+                   default:[ //某个模块被引入指定次数进行拆包
+                        minChunks:2,
+                        filename:"js/syy_[id].js",
+                         priority:-20,
+
+                   ]
+               }
+          }
+}
+4. 动态导入
+ - import('')
+ - webpack默认会单独打成一个文件
+ 对于生成的文件名可以配置optimization的chunkIds
+ optimization:{
+       chunkIds:"natural" //按照数字顺序生成 1 2 3... 当某个文件不在被依赖，重新打包序号都会变，影响缓存
+       // "named" //文件名和路径拼接
+       // "deterministic" 短数字(hash)，不会变  默认
+ }
+ 对于bundle名可以修改output的chunkFilename
+ output:{
+       chunkFilename:"js/chunk_[name]"
+ }
+ 在动态导入地方使用魔法注释添加name
+ import(/*webpackChunkName:"title"*/,'./title/')
+
+
+ 5. runtimeChunk
+- 会将动态打包相关信息抽离一个包，记录require  import等模块如何加载解析
+ - 当修改加载模块的内容，webpack会重新打包，生成的文件名会发生变化
+ - 当开启runtimeChunk后，修改文件，生成的文件名不会变化，只会修改抽离的包的文件,有利于浏览器缓存
+ optimization:{
+       runtimeChunk:true
+ }
+
+6. 懒加载
+- ex: 点击按钮，加载某个模块
+```
+btn.click(function(){
+      import('./utils').then(res=>{
+           consoel.log('...')
+      })
+})
+```
+
+7. prefetch与preload
+https://zhuanlan.zhihu.com/p/273298222
+1. link标签设置 prefetch <link rel="prefetch" href="static/img/ticket_bg.a5bb7c33.png">
+设置了prefetch的资源会在浏览器空闲时进行加载
+<link rel="preload" href="xxx" as="xx">
+设计上使用了自定义字体。开发完成后我们发现，页面首次加载时文字会出现短暂的字体样式闪动
+标签显式声明一个高优先级资源，强制浏览器提前请求资源，同时不阻塞文档正常onload
+preload link必须设置as属性来声明资源的类型（font/image/style/script等)，否则浏览器可能无法正确加载资源
+webpack中使用
+plugins: [
+  new PreloadWebpackPlugin({
+    rel: 'preload'，
+    as(entry) {  //资源类型
+      if (/\.css$/.test(entry)) return 'style';
+      if (/\.woff$/.test(entry)) return 'font';
+      if (/\.png$/.test(entry)) return 'image';
+      return 'script';
+    },
+    include: 'asyncChunks', // preload模块范围，还可取值'initial'|'allChunks'|'allAssets',
+    fileBlacklist: [/\.svg/] // 资源黑名单
+    fileWhitelist: [/\.script/] // 资源白名单
+  })
+]
+从前文的介绍可知，preload的设计初衷是为了尽早加载首屏需要的关键资源，从而提升页面渲染性能。
+
+目前浏览器基本上都具备预测解析能力，可以提前解析入口html中外链的资源，因此入口脚本文件、样式文件等不需要特意进行preload。
+
+但是一些隐藏在CSS和JavaScript中的资源，如字体文件，本身是首屏关键资源，但当css文件解析之后才会被浏览器加载。这种场景适合使用preload进行声明，尽早进行资源加载，避免页面渲染延迟。
+
+与preload不同，prefetch声明的是将来可能访问的资源，因此适合对异步加载的模块、可能跳转到的其他路由页面进行资源缓存；对于一些将来大概率会访问的资源，如上文案例中优惠券列表的背景图、常见的加载失败icon等，也较为适用
+preload-webpack-plugin 
+- 提前下载页面需要模块，等到需要用对应模块直接加载
+prefetch(预获取)：将来某些导航下可能需要的资源
+preload(预加载)：当前导航下可能需要资源
+btn.click(function(){
+      import('
+      /*webpackChunkName:"utils"*/
+      /*webpacPreFetch:true*/ 会在浏览器空闲时候进行加载可能会用到的资源，会提前加载
+      /*webpacPreLoad:true*/ 当前导航下可能需要用的资源，会立即下载，父 chunk 加载时，以并行方式开始加载,此时会在点击后加载资源
+      ./utils').then(res=>{
+           consoel.log('...')
+      })
+})
+
+8. 第三方扩展设置CDN
+- 查找网络资源首先去最近的边缘节点查找，然后去父节点，在找相邻父节点，不断往上找，直到源节点
+- 有cdn服务器，设置publicPath为cdn地址即可服务cdn上资源
+- 第三方包 设置 externals属性
+```
+externals:{
+     lodash:"_" //key为不希望打包的报名 value为对外暴露的全局变量值
+}
+html页面中通过script引入cdn链接
+
+```
+
+9. Dll库
+
+ 
+
+
+
+       
