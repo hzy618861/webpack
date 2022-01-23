@@ -738,6 +738,52 @@ optimization: {
                extractComments: false
           })],
 },
+
+ex: 多个html对于多个入口文件实例，通过new 多个 htmlWebackPlugin进行bundle的加载引入
+```
+
+const htmlWebackPlugin = require('html-webpack-plugin')
+const webpack = require('webpack')
+const path = require('path')
+module.exports =  {
+     mode:"development",
+     entry:{
+          index:"./src/main1.js",
+          album:"./src/main2.js",
+     },
+     resolve:{
+          extensions:['.js','.json','.vue','.jsx'],
+          alias:{
+               "@":path.resolve(__dirname,'../src')
+          }
+     },
+     output:{
+          filename:"[name].bundle.js"
+     },
+     plugins:[
+          new webpack.DefinePlugin({
+               BASE_URL:'"./"'
+          }),
+          new htmlWebackPlugin({
+               title:"index",
+               template:'./public/index.html',
+               filename:"index.html",
+               chunks:["index"]
+          }),
+          new htmlWebackPlugin({
+               title:"album",
+               template:'./public/album.html',
+               filename:"album.html",
+               chunks:["album"]
+          }),
+     ]
+ 
+  }
+```
+
+
+
+
 2. 可以通过entry的dependOn属性进行第三方资源的分包加载，第三方资源单独打成一个包
 main1:{
                import:"./src/main1.js",

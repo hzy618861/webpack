@@ -7,6 +7,7 @@
     "build": "webpack  --entry  ./src/main.js  --output-path ./build",
     "build2": "webpack",
     "dll": "webpack --config ./config/webpack.dll.js",
+    "muti": "webpack --config ./config/webpack.muti.js",
     "build-real": "webpack --config ./config/webpack.common.js --env production",
     "serve": "webpack serve",
     "serve-dev": "webpack serve   --config ./config/webpack.common.js --env development",
